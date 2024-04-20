@@ -13,22 +13,28 @@ from langchain_community.document_loaders.unstructured import UnstructuredFileLo
 from langchain_community.vectorstores.faiss import FAISS
 from langserve import RemoteRunnable
 
+from dotenv import load_dotenv
+load_dotenv()
+#print("OPEN API KEY : {}".format(os.environ.get("OPENAI_API_KEY")))
 
 # ⭐️ Embedding 설정
 # USE_BGE_EMBEDDING = True 로 설정시 HuggingFace BAAI/bge-m3 임베딩 사용 (2.7GB 다운로드 시간 걸릴 수 있습니다)
 # USE_BGE_EMBEDDING = False 로 설정시 OpenAIEmbeddings 사용 (OPENAI_API_KEY 입력 필요. 과금)
-USE_BGE_EMBEDDING = True
+# USE_BGE_EMBEDDING = True
+USE_BGE_EMBEDDING = False
 
 if not USE_BGE_EMBEDDING:
     # OPENAI API KEY 입력
     # Embedding 을 무료 한글 임베딩으로 대체하면 필요 없음!
-    os.environ["OPENAI_API_KEY"] = "OPENAI API KEY 입력"
+    #os.environ["OPENAI_API_KEY"] = "OPENAI API KEY 입력"
+    print(f"[API KEY]\n{os.environ['OPENAI_API_KEY']}")
 
 # ⭐️ LangServe 모델 설정(EndPoint)
 # 1) REMOTE 접속: 본인의 REMOTE LANGSERVE 주소 입력
 # (예시)
 # LANGSERVE_ENDPOINT = "https://poodle-deep-marmot.ngrok-free.app/llm/"
-LANGSERVE_ENDPOINT = "https://NGROK에서_할당받은_URL/llm/"
+LANGSERVE_ENDPOINT = "https://humble-curiously-antelope.ngrok-free.app/llm/"
+
 
 # 2) LocalHost 접속: 끝에 붙는 N4XyA 는 각자 다르니
 # http://localhost:8000/llm/playground 에서 python SDK 에서 확인!
@@ -110,6 +116,9 @@ def embed_file(file):
         )
     else:
         embeddings = OpenAIEmbeddings()
+
+    print("embeddings : {}".format(embeddings))
+
     cached_embeddings = CacheBackedEmbeddings.from_bytes_store(embeddings, cache_dir)
     vectorstore = FAISS.from_documents(docs, embedding=cached_embeddings)
     retriever = vectorstore.as_retriever()
